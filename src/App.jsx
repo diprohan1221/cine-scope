@@ -1,29 +1,27 @@
-import { useEffect, useState } from "react";
+﻿// src/App.jsx
+import React, { useState } from "react";
+import MovieList from "./components/MovieList";
+import SearchBar from "./components/SearchBar";
+import Auth from "./components/Auth";
 
-function App() {
-  const [movies, setMovies] = useState([]);
-
-  useEffect(() => {
-    fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${import.meta.env.VITE_TMDB_API_KEY}`)
-      .then(res => res.json())
-      .then(data => {
-        setMovies(data.results || []);
-      })
-      .catch(err => console.error(err));
-  }, []);
+export default function App() {
+  const [query, setQuery] = useState("");
+  const [searching, setSearching] = useState(false);
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold text-blue-500 mb-4">Hello, CineScope 🎬</h1>
-      <ul className="space-y-2">
-        {movies.map(movie => (
-          <li key={movie.id} className="text-lg text-gray-800">
-            {movie.title}
-          </li>
-        ))}
-      </ul>
+    <div className="min-h-screen bg-gray-50">
+      <header className="flex flex-col sm:flex-row items-center justify-between py-6 px-6 gap-4">
+        <h1 className="text-3xl font-bold text-blue-600">Hello, CineScope</h1>
+
+        <div className="flex items-center gap-4 w-full sm:w-auto">
+          <SearchBar query={query} setQuery={setQuery} searching={searching} />
+          <Auth />
+        </div>
+      </header>
+
+      <main>
+        <MovieList query={query} setSearching={setSearching} />
+      </main>
     </div>
   );
 }
-
-export default App;
