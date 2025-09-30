@@ -1,20 +1,23 @@
-// src/firebase.js
+// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore"; // <-- 1. Import firestore
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDvRUVsmaUJpPkdaicrsOa3iDRc21qOgU8",
-  authDomain: "cine-scope-73def.firebaseapp.com",
-  projectId: "cine-scope-73def",
-  storageBucket: "cine-scope-73def.appspot.com",
-  messagingSenderId: "1035758786355",
-  appId: "1:1035758786355:web:d7b1521fa6753be9485046",
-  measurementId: "G-3LKWBW6YW5"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Export auth instance for use in Auth.jsx
+// Initialize and export Firebase Authentication
 export const auth = getAuth(app);
+
+// Initialize and export Cloud Firestore
+export const db = getFirestore(app); // <-- 2. Initialize and export db

@@ -1,27 +1,38 @@
-﻿// src/App.jsx
-import React, { useState } from "react";
-import MovieList from "./components/MovieList";
-import SearchBar from "./components/SearchBar";
-import Auth from "./components/Auth";
+﻿import React from 'react';
+import { Routes, Route, Link } from 'react-router-dom';
 
-export default function App() {
-  const [query, setQuery] = useState("");
-  const [searching, setSearching] = useState(false);
+// 1. Import HomePage instead of MovieList
+import HomePage from './pages/HomePage';
+import Profile from './pages/Profile';
 
+import Auth from './components/Auth';
+
+function App() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="flex flex-col sm:flex-row items-center justify-between py-6 px-6 gap-4">
-        <h1 className="text-3xl font-bold text-blue-600">Hello, CineScope</h1>
-
-        <div className="flex items-center gap-4 w-full sm:w-auto">
-          <SearchBar query={query} setQuery={setQuery} searching={searching} />
-          <Auth />
+    <div className="bg-gray-900 text-white min-h-screen font-sans">
+      <header className="sticky top-0 z-50 bg-gray-900/80 backdrop-blur-sm">
+        <div className="container mx-auto px-4 py-3 flex justify-between items-center border-b border-gray-700">
+          <Link to="/" className="text-2xl font-bold text-cyan-400">
+            CineScope 🎬
+          </Link>
+          <div className="flex items-center gap-4">
+            <Link to="/profile" className="text-gray-300 hover:text-white">
+              My Profile
+            </Link>
+            <Auth />
+          </div>
         </div>
       </header>
 
       <main>
-        <MovieList query={query} setSearching={setSearching} />
+        <Routes>
+          {/* 2. Use HomePage for the main route */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/profile" element={<Profile />} />
+        </Routes>
       </main>
     </div>
   );
 }
+
+export default App;

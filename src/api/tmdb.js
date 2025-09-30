@@ -1,29 +1,57 @@
 // src/api/tmdb.js
-const BASE_URL = 'https://api.themoviedb.org/3';
+
+import axios from 'axios';
+
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
-export const IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
+const BASE_URL = 'https://api.themoviedb.org/3';
 
-async function fetchFromTMDB(path, params = {}) {
-  if (!API_KEY) throw new Error('Missing TMDB API key. Check .env.local and restart dev server.');
-  const url = new URL(`${BASE_URL}${path}`);
-  url.searchParams.set('api_key', API_KEY);
-  Object.entries(params).forEach(([k, v]) => {
-    if (v !== undefined && v !== null) url.searchParams.set(k, String(v));
-  });
+// NEW: Add the base URL for images
+export const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 
-  const res = await fetch(url.href);
-  if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw new Error(`TMDB API error ${res.status}: ${text}`);
+export const fetchPopularMovies = async () => {
+  try {
+    const response = await axios.get(`${BASE_URL}/movie/popular?api_key=${API_KEY}`);
+    return response.data.results;
+  } catch (error) {
+    console.error('Error fetching popular movies:', error);
+    return [];
   }
-  return res.json();
-}
+};
 
-export const fetchPopularMovies = (page = 1) =>
-  fetchFromTMDB('/movie/popular', { language: 'en-US', page });
+export const searchMovies = async (query) => {
+  try {
+    const response = await axios.get(`${BASE_URL}/search/movie?api_key=${API_KEY}&query=${query}`);
+    return response.data.results;
+  } catch (error) {
+    console.error('Error searching movies:', error);
+    return [];
+  }
+};
 
-export const searchMovies = (query, page = 1) =>
-  fetchFromTMDB('/search/movie', { query, page, language: 'en-US' });
-
-export const getMovieDetails = (id) =>
-  fetchFromTMDB(`/movie/${id}`, { language: 'en-US' });
+// NEW: Add the function to get details for one movie
+export const getMovieDetails = async (movieId) => {
+  try {
+    const response = await axios.get(`${BASE_URL}/movie/${movieId}?api_key=${API_KEY}`);
+    // This endpoint returns the full movie object directly
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching details for movie ${movieId}:`, error);
+    // Return null or throw the error, depending on how you want to handle it
+    return null;
+  }
+};
+// NEW: Add this function to get movie videos (trailers)
+export const getMovieVideos = async (movieId) => {
+  try {
+    const response = await axios.get(`${BASE_URL}/movie/${movieId}/videos?api_key=${API_KEY}`);
+    // Find the official trailer on YouTube from the results
+    const officialTrailer = response.data.results.find(
+      video => video.site === 'YouTube' && video.type === 'Trailer'
+    );
+    // Return the YouTube key if a trailer is found
+    return officialTrailer ? officialTrailer.key : null;
+  } catch (error) {
+    console.error(`Error fetching videos for movie ${movieId}:`, error);
+    return null;
+  }
+};

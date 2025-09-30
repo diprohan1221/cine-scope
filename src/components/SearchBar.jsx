@@ -1,54 +1,41 @@
-// src/components/SearchBar.jsx
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect, useRef } from 'react';
 
-export default function SearchBar({ query, setQuery, searching }) {
-  const searchInputRef = useRef(null);
+// This is now a "controlled component." Its state is managed by its parent, App.jsx.
+function SearchBar({ searchQuery, setSearchQuery }) {
+  const inputRef = useRef(null);
 
-  // Focus shortcut: press "/" to focus search
+  // Keyboard shortcut effect ('/')
   useEffect(() => {
-    const onKeyDown = (e) => {
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
-
-      const active = document.activeElement;
-      const tag = active && active.tagName && active.tagName.toLowerCase();
-      if (tag === "input" || tag === "textarea" || active.isContentEditable) return;
-
-      if (e.key === "/") {
+    const handleKeyDown = (e) => {
+      if (e.key === '/') {
         e.preventDefault();
-        if (searchInputRef.current) {
-          searchInputRef.current.focus();
-          searchInputRef.current.select();
-        }
+        inputRef.current?.focus();
       }
     };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const onClear = () => setQuery("");
-
   return (
-    <div className="flex-1 max-w-md relative">
+    <div className="relative w-full max-w-xs">
       <input
-        ref={searchInputRef}
-        type="search"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search movies (press / to focus)"
-        className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-        aria-label="Search movies"
+        ref={inputRef}
+        type="text"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        placeholder="Search for a movie..."
+        className="bg-gray-800 text-white rounded-full px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
       />
-      {query && (
+      {searchQuery && (
         <button
-          onClick={onClear}
-          className="absolute right-2 top-1/2 -translate-y-1/2 bg-white rounded-full p-1 hover:bg-gray-100"
-          title="Clear"
+          onClick={() => setSearchQuery('')}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
         >
           ✕
         </button>
       )}
-      {searching && <p className="text-sm text-gray-500 mt-1">Searching for "{query}"…</p>}
     </div>
   );
 }
+
+export default SearchBar;
