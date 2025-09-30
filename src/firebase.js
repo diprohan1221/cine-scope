@@ -1,9 +1,8 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore"; // <-- 1. Import firestore
+import { getFirestore } from "firebase/firestore";
 
-// Your web app's Firebase configuration
+// The config object now safely reads from your .env.local file
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -20,4 +19,4 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
 // Initialize and export Cloud Firestore
-export const db = getFirestore(app); // <-- 2. Initialize and export db
+export const db = getFirestore(app);
