@@ -1,15 +1,13 @@
 ﻿import React from 'react';
-// 1. Import useLocation
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import Profile from './pages/Profile';
+import Debug from './pages/Debug'; // 1. Import the new page
 import Auth from './components/Auth';
 import { Toaster } from 'react-hot-toast';
-// 2. Import AnimatePresence
 import { AnimatePresence } from 'framer-motion';
 
 function App() {
-  // 3. Get the current page location
   const location = useLocation();
 
   return (
@@ -24,28 +22,30 @@ function App() {
           },
         }}
       />
-
       <div className="bg-gray-900 text-white min-h-screen font-sans">
-        <header className="sticky top-0 z-50 bg-gray-900/80 backdrop-blur-sm">
-          <div className="container mx-auto px-4 py-3 flex justify-between items-center border-b border-gray-700">
-            <Link to="/" className="text-2xl font-bold text-cyan-400">
-              CineScope 🎬
-            </Link>
-            <div className="flex items-center gap-4">
-              <Link to="/profile" className="text-gray-300 hover:text-white">
-                My Profile
+        {/* Only show the header if we are NOT on the debug page */}
+        {location.pathname !== '/debug' && (
+          <header className="sticky top-0 z-50 bg-gray-900/80 backdrop-blur-sm">
+            <div className="container mx-auto px-4 py-3 flex justify-between items-center border-b border-gray-700">
+              <Link to="/" className="text-2xl font-bold text-cyan-400">
+                CineScope 🎬
               </Link>
-              <Auth />
+              <div className="flex items-center gap-4">
+                <Link to="/profile" className="text-gray-300 hover:text-white">
+                  My Profile
+                </Link>
+                <Auth />
+              </div>
             </div>
-          </div>
-        </header>
+          </header>
+        )}
 
         <main>
-          {/* 4. Wrap Routes with AnimatePresence */}
           <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
               <Route path="/" element={<HomePage />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/debug" element={<Debug />} /> {/* 2. Add the new route */}
             </Routes>
           </AnimatePresence>
         </main>
