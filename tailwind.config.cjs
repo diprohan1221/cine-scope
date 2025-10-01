@@ -1,6 +1,10 @@
-// tailwind.config.js
+/** @type {import('tailwindcss').Config} */
 module.exports = {
-  // ...
+  darkMode: 'class', // <-- The important new line
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
   theme: {
     extend: {
       keyframes: {
@@ -19,5 +23,5 @@ module.exports = {
       },
     },
   },
-  // ...
-};
+  plugins: [],
+}

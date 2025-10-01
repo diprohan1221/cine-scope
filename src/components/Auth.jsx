@@ -1,51 +1,71 @@
-// src/components/Auth.jsx
-import React, { useState, useEffect } from "react";
-import { auth } from "../firebase";
-import { GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
+import React, { useState } from 'react';
+import { auth } from '../firebase';
+import { useAuth } from '../hooks/useAuth';
+import { signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
+import toast from 'react-hot-toast';
+import ConfirmationModal from './ConfirmationModal'; // 1. Import our new modal
 
-export default function Auth() {
-  const [user, setUser] = useState(null);
-
-  // Listen for auth state changes
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-    return () => unsubscribe();
-  }, []);
+function Auth() {
+  const user = useAuth();
+  // 2. Add state to manage the modal's visibility
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleGoogleSignIn = async () => {
+    const provider = new GoogleAuthProvider();
     try {
-      const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
+      toast.success('Signed in successfully!');
     } catch (error) {
-      console.error("Google Sign-In Error:", error.message);
+      toast.error('Could not complete sign in.');
+      console.error(error);
     }
   };
 
   const handleSignOut = async () => {
+    // This function now handles the actual sign-out logic
     try {
       await signOut(auth);
+      toast.success('Signed out successfully!');
     } catch (error) {
-      console.error("Sign-Out Error:", error.message);
+      toast.error('Could not sign out.');
+      console.error(error);
     }
+    setIsModalOpen(false); // Close modal after action
   };
 
-  if (user) {
-    return (
-      <div className="flex items-center gap-4">
-        <img src={user.photoURL} alt={user.displayName} className="w-10 h-10 rounded-full" />
-        <span className="font-semibold">{user.displayName}</span>
-        <button onClick={handleSignOut} className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
-          Sign Out
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <button onClick={handleGoogleSignIn} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-      Sign In with Google
-    </button>
+    <>
+      {user ? (
+        <div className="flex items-center gap-2">
+          <img src={user.photoURL} alt={user.displayName} className="w-8 h-8 rounded-full" />
+          <span className="text-sm hidden md:block">{user.displayName}</span>
+          {/* 3. This button now just opens the modal */}
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Sign Out
+          </button>
+        </div>
+      ) : (
+        <button 
+          onClick={handleGoogleSignIn}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Sign In with Google
+        </button>
+      )}
+
+      {/* 4. We render the modal here */}
+      <ConfirmationModal 
+        isOpen={isModalOpen}
+        message="Are you sure you want to log out?"
+        onConfirm={handleSignOut}
+        onCancel={() => setIsModalOpen(false)}
+        confirmText="Log Out"
+      />
+    </>
   );
 }
+
+export default Auth;

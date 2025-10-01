@@ -3,7 +3,7 @@ import { useAuth } from '../hooks/useAuth';
 import { getFavorites } from '../api/firestore';
 import MovieCard from '../components/MovieCard';
 import MovieModal from '../components/MovieModal';
-import AnimatedPage from '../components/AnimatedPage'; // 1. Import the wrapper
+import AnimatedPage from '../components/AnimatedPage';
 
 function Profile() {
   const user = useAuth();
@@ -27,20 +27,20 @@ function Profile() {
   }, [user]);
 
   return (
-    // 2. Wrap the page's content with AnimatedPage
     <AnimatedPage>
       <>
-        <div className="container mx-auto px-4 py-8 text-white">
+        {/* The "text-white" class has been removed from this div */}
+        <div className="container mx-auto px-4 py-8">
           <h1 className="text-4xl font-bold mb-6">My Favorite Movies</h1>
           {isLoading ? ( <div className="text-center">Loading your profile...</div> ) :
-           !user ? ( <div className="text-center">Please sign in to see your favorite movies.</div> ) :
+           !user ? ( <div className="text-center text-gray-500 dark:text-gray-400">Please sign in to see your favorite movies.</div> ) :
            favoriteMovies.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {favoriteMovies.map((movie) => (
                 <MovieCard key={movie.id} movie={movie} onCardClick={() => setSelectedMovie(movie)} />
               ))}
             </div>
-          ) : ( <p className="text-lg text-gray-400">You haven't added any favorites yet.</p> )}
+          ) : ( <p className="text-lg text-gray-600 dark:text-gray-400">You haven't added any favorites yet. Go find some movies!</p> )}
         </div>
 
         {selectedMovie && (
