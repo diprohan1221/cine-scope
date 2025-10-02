@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { getMovieDetails, IMAGE_BASE_URL, getMovieVideos } from '../api/tmdb';
 import { useAuth } from '../hooks/useAuth';
-import { addFavorite, removeFavorite, isFavorite, addOrUpdateReview, getReviewsForMovie } from '../api/firestore';
+import { addFavorite, removeFavorite, isFavorite, addOrUpdateReview, getReviewsForMovie, deleteReview } from '../api/firestore';
 import toast from 'react-hot-toast';
 import StarRating from './StarRating';
+import { Tabs, Tab } from './Tabs';
+import ConfirmationModal from './ConfirmationModal';
 
 function MovieModal({ movie, onClose }) {
   const user = useAuth();
@@ -14,6 +16,7 @@ function MovieModal({ movie, onClose }) {
   const [newRating, setNewRating] = useState(0);
   const [newReviewText, setNewReviewText] = useState('');
   const [reviews, setReviews] = useState([]);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -62,59 +65,80 @@ function MovieModal({ movie, onClose }) {
     setNewReviewText('');
   };
 
+  const handleDeleteReview = async () => {
+    if (!user) return;
+    const promise = deleteReview(movie.id, user.uid).then(() => {
+      getReviewsForMovie(movie.id).then(setReviews);
+    });
+    toast.promise(promise, {
+      loading: 'Deleting review...',
+      success: 'Review deleted!',
+      error: 'Could not delete review.',
+    });
+    setIsDeleteModalOpen(false);
+  };
+
   const handleBackdropClick = (e) => { if (e.target.id === 'modal-backdrop') { onClose(); } };
   const posterUrl = movie.poster_path ? `${IMAGE_BASE_URL}${movie.poster_path}` : 'https://via.placeholder.com/300x450?text=No+Image';
 
   return (
-    <div id="modal-backdrop" onClick={handleBackdropClick} className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-start z-50 p-4 pt-12 overflow-y-auto animate-fade-in">
-      <div 
-        onClick={(e) => e.stopPropagation()} 
-        className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white w-full max-w-4xl rounded-lg shadow-xl overflow-hidden relative flex flex-col animate-slide-up my-auto"
-      >
-        {/* Header */}
-        <div className="flex-shrink-0 px-6 py-4 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-2xl font-bold truncate">{movie.title}</h2>
-          <button onClick={onClose} className="text-3xl font-bold hover:text-cyan-400">&times;</button>
-        </div>
-  
-        {/* Scrollable Body */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="p-6">
-            <div className="flex flex-col md:flex-row gap-6 mb-6">
-              <div className="flex-shrink-0 mx-auto md:mx-0 w-2/3 md:w-1/3">
-                <img src={posterUrl} alt={movie.title} className="w-full h-auto rounded-lg shadow-lg" />
-              </div>
-              <div className="flex-grow">
-                {isLoading ? ( <p className="text-gray-400 dark:text-gray-300">Loading details...</p> ) : details ? (
-                  <>
-                    <p className="mb-4 italic text-gray-500 dark:text-gray-400">{details.tagline}</p>
-                    <p className="mb-4 text-gray-700 dark:text-gray-300">{details.overview}</p>
-                    {user && ( <button onClick={handleFavoriteClick} className={`mb-4 px-4 py-2 rounded-lg font-semibold transition-colors ${isFavorited ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-cyan-500 hover:bg-cyan-600 text-white'}`}> {isFavorited ? '❤️ Remove from Favorites' : '🤍 Add to Favorites'} </button> )}
-                    <div className="flex flex-wrap gap-x-4 gap-y-2 mb-4 text-sm">
-                      <span><strong>Rating:</strong> ⭐ {details.vote_average?.toFixed(1)} / 10</span>
-                      <span><strong>Runtime:</strong> ⏳ {details.runtime} minutes</span>
-                      <span><strong>Released:</strong> 🗓️ {details.release_date}</span>
+    <>
+      <div id="modal-backdrop" onClick={handleBackdropClick} className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-start z-50 p-4 pt-12 overflow-y-auto animate-fade-in">
+        <div onClick={(e) => e.stopPropagation()} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white w-full max-w-4xl rounded-lg shadow-xl overflow-hidden relative flex flex-col animate-slide-up my-auto max-h-[90vh]">
+          <div className="flex-shrink-0 px-6 py-4 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-2xl font-bold truncate">{movie.title}</h2>
+            <button onClick={onClose} className="text-3xl font-bold hover:text-cyan-400">&times;</button>
+          </div>
+      
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-6">
+              <Tabs>
+                <Tab label="Details">
+                  <div className="flex flex-col md:flex-row gap-8">
+                    <div className="flex-shrink-0 mx-auto md:mx-0 w-full sm:w-1/2 md:w-2/5">
+                      <img src={posterUrl} alt={movie.title} className="w-full h-auto rounded-lg shadow-lg" />
                     </div>
-                    <div className="flex flex-wrap gap-2 items-center"><strong>Genres:</strong> {details.genres?.map(genre => ( <span key={genre.id} className="bg-gray-200 dark:bg-gray-700 rounded-full px-3 py-1 text-sm"> {genre.name} </span> ))} </div>
-                  </>
-                ) : ( <p className="text-red-500">Could not load movie details.</p> )}
-              </div>
+                    <div className="flex-grow">
+                      {isLoading ? ( <p className="text-gray-400 dark:text-gray-300">Loading details...</p> ) : details ? (
+                        <>
+                          <p className="mb-4 italic text-gray-500 dark:text-gray-400">{details.tagline}</p>
+                          <p className="mb-4 text-gray-700 dark:text-gray-300 leading-relaxed">{details.overview}</p>
+                          {user && ( <button onClick={handleFavoriteClick} className={`mb-4 px-4 py-2 rounded-lg font-semibold transition-colors ${isFavorited ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-cyan-500 hover:bg-cyan-600 text-white'}`}> {isFavorited ? '❤️ Remove from Favorites' : '🤍 Add to Favorites'} </button> )}
+                          <div className="flex flex-wrap gap-x-4 gap-y-2 mb-4 text-sm">
+                            <span><strong>Rating:</strong> ⭐ {details.vote_average?.toFixed(1)} / 10</span>
+                            <span><strong>Runtime:</strong> ⏳ {details.runtime} minutes</span>
+                            <span><strong>Released:</strong> 🗓️ {details.release_date}</span>
+                          </div>
+                          <div className="flex flex-wrap gap-2 items-center"><strong>Genres:</strong> {details.genres?.map(genre => ( <span key={genre.id} className="bg-gray-200 dark:bg-gray-700 rounded-full px-3 py-1 text-sm"> {genre.name} </span> ))} </div>
+                        </>
+                      ) : ( <p className="text-red-500">Could not load movie details.</p> )}
+                    </div>
+                  </div>
+                  {trailerKey && (
+                    <div className="mt-12">
+                      <h3 className="text-xl font-semibold mb-3">Trailer</h3>
+                      <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden shadow-lg"><iframe width="100%" height="100%" src={`https://www.youtube.com/embed/${trailerKey}?mute=1&modestbranding=1&rel=0`} title="YouTube video player" frameBorder="0" allowFullScreen></iframe></div>
+                    </div>
+                  )}
+                </Tab>
+                <Tab label="Reviews">
+                  {user && ( <div className="pt-4"> <h3 className="text-xl font-semibold mb-3">Your Review</h3> <form onSubmit={handleReviewSubmit}> <StarRating rating={newRating} onRatingChange={setNewRating} /> <textarea value={newReviewText} onChange={(e) => setNewReviewText(e.target.value)} className="w-full h-24 p-2 mt-4 rounded bg-gray-100 dark:bg-gray-700 border-transparent focus:border-cyan-500 focus:ring-0" placeholder="Write your thoughts..."></textarea> <button type="submit" className="mt-2 bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded">Submit Review</button> </form> </div> )}
+                  <div className="mt-8 border-t border-gray-200 dark:border-gray-700 pt-4"> <h3 className="text-xl font-semibold mb-4">Community Reviews</h3> {reviews.length > 0 ? ( <div className="space-y-4 max-h-48 overflow-y-auto pr-2">{reviews.map(review => ( <div key={review.id} className="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg"> <div className="flex items-start justify-between"> <div className="flex items-center mb-2"> <img src={review.authorImage} alt={review.authorName} className="w-8 h-8 rounded-full mr-3" /> <div> <p className="font-semibold">{review.authorName}</p> <StarRating rating={review.rating} size={16} isEditable={false} /> </div> </div> {user && review.id === user.uid && ( <button onClick={() => setIsDeleteModalOpen(true)} className="text-xs text-gray-500 hover:text-red-500 font-semibold"> DELETE </button> )} </div> {review.text && <p className="text-gray-700 dark:text-gray-300 text-sm">{review.text}</p>} </div>))} </div> ) : ( !isLoading && <p className="text-gray-500 dark:text-gray-400">No reviews yet. Be the first to write one!</p> )} </div>
+                </Tab>
+              </Tabs>
             </div>
-  
-            {user && ( <div className="border-t border-gray-200 dark:border-gray-700 pt-4"> <h3 className="text-xl font-semibold mb-3">Your Review</h3> <form onSubmit={handleReviewSubmit}> <StarRating rating={newRating} onRatingChange={setNewRating} /> <textarea value={newReviewText} onChange={(e) => setNewReviewText(e.target.value)} className="w-full h-24 p-2 mt-4 rounded bg-gray-100 dark:bg-gray-700 border-transparent focus:border-cyan-500 focus:ring-0" placeholder="Write your thoughts..."></textarea> <button type="submit" className="mt-2 bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded">Submit Review</button> </form> </div> )}
-            
-            <div className="mt-8 border-t border-gray-200 dark:border-gray-700 pt-4"> <h3 className="text-xl font-semibold mb-4">Community Reviews</h3> {reviews.length > 0 ? ( <div className="space-y-4 max-h-48 overflow-y-auto pr-2">{reviews.map(review => ( <div key={review.id} className="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg"> <div className="flex items-center mb-2"> <img src={review.authorImage} alt={review.authorName} className="w-8 h-8 rounded-full mr-3" /> <div> <p className="font-semibold">{review.authorName}</p> <StarRating rating={review.rating} size={16} isEditable={false} /> </div> </div> {review.text && <p className="text-gray-700 dark:text-gray-300 text-sm">{review.text}</p>} </div>))} </div> ) : ( !isLoading && <p className="text-gray-500 dark:text-gray-400">No reviews yet. Be the first to write one!</p> )} </div>
-  
-            {trailerKey && (
-              <div className="mt-6">
-                <h3 className="text-xl font-semibold mb-3">Trailer</h3>
-                <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden"><iframe width="100%" height="100%" src={`https://www.youtube.com/embed/${trailerKey}?mute=1&modestbranding=1&rel=0`} title="YouTube video player" frameBorder="0" allowFullScreen></iframe></div>
-              </div>
-            )}
           </div>
         </div>
       </div>
-    </div>
+
+      <ConfirmationModal
+        isOpen={isDeleteModalOpen}
+        message="Are you sure you want to delete this review? This action cannot be undone."
+        onConfirm={handleDeleteReview}
+        onCancel={() => setIsDeleteModalOpen(false)}
+        confirmText="Delete"
+      />
+    </>
   );
 }
 
