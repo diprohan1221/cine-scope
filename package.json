@@ -21,6 +21,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
+    "@headlessui/react": "^2.2.9",
+    "@heroicons/react": "^2.2.0",
     "@tailwindcss/postcss": "^4.1.13",
     "@tailwindcss/postcss7-compat": "^2.2.17",
     "@types/react": "^19.1.13",

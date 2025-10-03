@@ -3,11 +3,10 @@ import { auth } from '../firebase';
 import { useAuth } from '../hooks/useAuth';
 import { signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
 import toast from 'react-hot-toast';
-import ConfirmationModal from './ConfirmationModal'; // 1. Import our new modal
+import ConfirmationModal from './ConfirmationModal';
 
 function Auth() {
   const user = useAuth();
-  // 2. Add state to manage the modal's visibility
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleGoogleSignIn = async () => {
@@ -22,7 +21,6 @@ function Auth() {
   };
 
   const handleSignOut = async () => {
-    // This function now handles the actual sign-out logic
     try {
       await signOut(auth);
       toast.success('Signed out successfully!');
@@ -30,19 +28,19 @@ function Auth() {
       toast.error('Could not sign out.');
       console.error(error);
     }
-    setIsModalOpen(false); // Close modal after action
+    setIsModalOpen(false);
   };
 
   return (
     <>
       {user ? (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <img src={user.photoURL} alt={user.displayName} className="w-8 h-8 rounded-full" />
-          <span className="text-sm hidden md:block">{user.displayName}</span>
-          {/* 3. This button now just opens the modal */}
+          {/* --- FIX: Added text color for light/dark modes --- */}
+          <span className="text-sm font-medium hidden md:block text-gray-700 dark:text-gray-300">{user.displayName}</span>
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+            className="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm"
           >
             Sign Out
           </button>
@@ -50,13 +48,12 @@ function Auth() {
       ) : (
         <button 
           onClick={handleGoogleSignIn}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded"
         >
           Sign In with Google
         </button>
       )}
 
-      {/* 4. We render the modal here */}
       <ConfirmationModal 
         isOpen={isModalOpen}
         message="Are you sure you want to log out?"

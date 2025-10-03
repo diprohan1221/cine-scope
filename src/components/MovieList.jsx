@@ -81,18 +81,15 @@ function MovieList({ searchQuery, selectedGenre }) {
         ) : ( !isLoading && <div className="p-8 text-center text-gray-600 dark:text-gray-400">No movies found.</div> )}
 
         {movies.length > 0 && (
-          // --- THIS IS THE UPDATED BUTTON SECTION ---
           <div className="flex justify-center mt-8">
             <button
               onClick={handleLoadMore}
               disabled={isLoading}
               className="group flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold py-3 px-8 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? (
-                <span>Loading...</span>
-              ) : (
+              {isLoading ? ( <span>Loading...</span> ) : (
                 <>
-                  <span>Click here to see more</span>
+                  <span>Load More</span>
                   <svg className="w-5 h-5 transition-transform group-hover:translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
                   </svg>
@@ -102,7 +99,11 @@ function MovieList({ searchQuery, selectedGenre }) {
           </div>
         )}
       </div>
-      {selectedMovie && ( <MovieModal movie={selectedMovie} onClose={() => setSelectedMovie(null)} /> )}
+      
+      {/* The modal is now much simpler to call! */}
+      {selectedMovie && (
+        <MovieModal movie={selectedMovie} onClose={() => setSelectedMovie(null)} />
+      )}
     </>
   );
 }

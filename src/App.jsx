@@ -26,14 +26,14 @@ function App() {
       />
       <div className="bg-white dark:bg-gray-900 text-gray-800 dark:text-white min-h-screen font-sans transition-colors duration-300">
 
-        {/* --- THIS IS THE ONLY LINE THAT HAS CHANGED --- */}
         <header className="bg-white dark:bg-gray-900 transition-colors duration-300">
           <div className="container mx-auto px-4 py-3 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
             <Link to="/" className="text-2xl font-bold text-cyan-500 dark:text-cyan-400">
               CineScope 🎬
             </Link>
             <div className="flex items-center gap-4">
-              <Link to="/profile" className="text-gray-600 dark:text-gray-300 hover:text-cyan-500 dark:hover:text-white">
+              {/* --- FIX: Updated text colors for light/dark modes --- */}
+              <Link to="/profile" className="font-medium text-gray-700 dark:text-gray-300 hover:text-cyan-500 dark:hover:text-cyan-400">
                 My Profile
               </Link>
               <Auth />

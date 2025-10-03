@@ -1,15 +1,16 @@
 import { db } from '../firebase';
 import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, serverTimestamp } from 'firebase/firestore';
 
+// ======================= CORRECTED FUNCTION =======================
 export const addFavorite = async (userId, movie) => {
   const favoriteRef = doc(db, 'users', userId, 'favorites', String(movie.id));
+  // FIX: We now only save the title and poster_path, which we know are available.
   await setDoc(favoriteRef, {
     title: movie.title,
     poster_path: movie.poster_path,
-    release_date: movie.release_date,
-    vote_average: movie.vote_average
   });
 };
+// ================================================================
 
 export const removeFavorite = async (userId, movieId) => {
   const favoriteRef = doc(db, 'users', userId, 'favorites', String(movieId));
@@ -47,12 +48,6 @@ export const getReviewsForMovie = async (movieId) => {
   return reviews;
 };
 
-// --- NEW FUNCTION ---
-/**
- * Deletes a user's review for a specific movie.
- * @param {string} movieId - The ID of the movie.
- * @param {string} userId - The ID of the user whose review is being deleted.
- */
 export const deleteReview = async (movieId, userId) => {
   const reviewRef = doc(db, 'movies', String(movieId), 'reviews', userId);
   await deleteDoc(reviewRef);

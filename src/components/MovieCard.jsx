@@ -8,8 +8,8 @@ function MovieCard({ movie, onCardClick }) {
 
   return (
     // --- CHANGES ARE ON THIS LINE ---
-    <div 
-      onClick={onCardClick} 
+    <div
+      onClick={onCardClick}
       className="bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-all duration-300 cursor-pointer"
     >
       <img src={posterUrl} alt={movie.title} className="w-full h-auto" />
