@@ -1,7 +1,7 @@
 🎬 CineScope - A Movie Review & Rating Platform
 I developed CineScope as a major project for an internship. The goal was to build a complete, full-stack web application using modern technologies like React and Firebase. I was inspired to create a clean, fast, and user-friendly alternative to existing movie sites, focusing on a great experience for discovering, saving, and reviewing movies.
 
-Live Demo: https://cine-scope.vercel.app/
+Live Demo: https://cine-scope-murex.vercel.app/
 
 [CineScope Screenshot] 
 (https://github.com/user-attachments/assets/6dcc9cfa-ab6a-430d-8306-198cd9ac849c,
